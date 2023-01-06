@@ -1,44 +1,19 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse
+from django.http import  HttpResponseRedirect
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.views import generic
 from .models import Choice, Question
-# Create your views here.
 from django.utils import timezone
 
 from django.shortcuts import get_object_or_404, render
-
-
-
-# def index(request):
-#     latest_question_list = Question.objects.order_by('-pub_date')[:5]
-#     context = {'latest_question_list': latest_question_list}
-#     return render(request, 'polls/index.html', context)
-
-# def index(request):
-#     return HttpResponse("Hello, world. You're at the polls index.")
-
-# def detail(request, question_id):
-#     try:
-#         question = Question.objects.get(pk=question_id)
-#     except Question.DoesNotExist:
-#         raise Http404("Question does not exist")
-# def detail(request, question_id):
-#     question = get_object_or_404(Question, pk=question_id)
-#     return render(request, 'polls/detail.html', {'question': question})
-#     return render(request, 'polls/detail.html', {'question': question})
-# def results(request, question_id):
-#     question = get_object_or_404(Question, pk=question_id)
-#     return render(request, 'polls/results.html', {'question': question})
-
-# def vote(request, question_id):
-#     return HttpResponse("You're voting on question %s." % question_id)
 class IndexView(generic.ListView):
     template_name = 'polls/index.html'
     context_object_name = 'latest_question_list'
 
     def get_queryset(self):
         """Return the last five published questions."""
-        return Question.objects.order_by('-pub_date')[:5]
+        return Question.objects.order_by('-pub_date')[:20]
 
 
 class DetailView(generic.DetailView):
@@ -75,4 +50,17 @@ def get_queryset(self):
     """
     return Question.objects.filter(
     pub_date__lte=timezone.now()
-    ).order_by('-pub_date')[:5]
+    ).order_by('-pub_date')[:20]
+
+def create(request):
+    
+    context = {}
+    if request.method == "POST":
+        question = Question.objects.create(question_text=request.POST['question_name'],pub_date=request.POST['pub_date'])
+        Choice.objects.create(question=question,choice_text = request.POST['choice3'],votes = 0)
+        Choice.objects.create(question=question,choice_text = request.POST['choice1'],votes = 0)
+        Choice.objects.create(question=question,choice_text = request.POST['choice2'],votes = 0)
+         
+        return redirect('/polls/')
+
+    return render(request,'create.html',context)
